@@ -89,9 +89,54 @@ Web en `http://localhost:3000`, panel en `http://localhost:3000/login`.
 
 ---
 
-## 5. Despliegue en VPS (Docker)
+## 5. Despliegue en Vercel (serverless)
 
-### 5.1 En el VPS
+El proyecto ya viene preparado: `vercel.json` + la función `api/index.js` envuelven todo el backend, y el script `vercel-build` compila frontend y backend automáticamente en cada push.
+
+### 5.1 Importar el proyecto
+
+1. En Vercel: **Add New → Project** → importa el repo `agroaper-web-independiente`.
+2. No toques nada de build: `vercel.json` ya define todo (`outputDirectory: dist/public`, función con 60 s de duración máxima).
+
+### 5.2 Variables de entorno (Project Settings → Environment Variables)
+
+Añade TODAS estas (Production + Preview):
+
+| Variable | Valor |
+|---|---|
+| `DATABASE_URL` | **La URI del POOLER de Supabase (puerto 6543, modo Transaction)** — obligatorio, Vercel no soporta la conexión directa (IPv6) |
+| `APP_SECRET` | Cadena larga aleatoria |
+| `AI_API_KEY` / `AI_BASE_URL` / `AI_MODEL` | Tu proveedor de IA |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_BUCKET` | De Supabase |
+| `RELEVANCE_WEBHOOK_SECRET` | (Opcional) si usas el agente de Relevance |
+| `VITE_RELEVANCE_EMBED_SNIPPET` | (Opcional) el snippet del widget de Relevance |
+
+> ⚠️ El pooler se copia en Supabase: **Project Settings → Database → Connection Pooling → Transaction mode**. Su URI tiene forma `postgresql://postgres.xxxx:PASS@aws-0-REGION.pooler.supabase.com:6543/postgres`.
+
+### 5.3 Crear tablas y admin (una sola vez, desde tu PC)
+
+Con el `.env` local apuntando al pooler (o a la conexión directa, desde tu PC ambas valen):
+
+```powershell
+npm install
+npm run db:push
+npm run db:seed
+```
+
+### 5.4 Limitaciones de Vercel a conocer
+
+- **Adjuntos de máximo 3 MB** (ya ajustado en el código): Vercel corta los bodies de más de 4,5 MB. Si algún día pasas la web al VPS, puedes subir ese límite.
+- **Cold starts**: la primera petición tras un rato sin tráfico puede tardar 1-3 segundos extra (el chat de IA incluido). Después responde al instante.
+- **Rate limiting en memoria**: los límites anti-spam cuentan por instancia de función, no globales. Para el volumen de una web corporativa es suficiente.
+- Si el agente de Relevance llama al webhook, la URL es `https://tu-proyecto.vercel.app/api/webhooks/relevance`.
+
+### 5.5 Actualizar
+
+Cada `git push` a `main` dispara un despliegue automático.
+
+## 6. Despliegue en VPS (Docker) — alternativa
+
+### 6.1 En el VPS
 
 ```bash
 # Instalar Docker (Ubuntu/Debian)
@@ -110,7 +155,7 @@ docker compose up -d --build
 
 La web queda en `http://IP_DEL_VPS:3000`.
 
-### 5.2 Dominio + HTTPS (recomendado: Caddy)
+### 6.2 Dominio + HTTPS (recomendado: Caddy)
 
 Instala Caddy y crea `/etc/caddy/Caddyfile`:
 
@@ -126,7 +171,7 @@ sudo systemctl reload caddy
 
 Caddy emite y renueva el certificado HTTPS automáticamente.
 
-### 5.3 Actualizar la web tras cambios en Cursor
+### 6.3 Actualizar la web tras cambios en Cursor
 
 ```bash
 git pull
@@ -135,10 +180,11 @@ docker compose up -d --build
 
 ---
 
-## 6. Estructura del proyecto
+## 7. Estructura del proyecto
 
 ```
-api/            Backend (Hono + tRPC)
+server/         Backend (Hono + tRPC)
+api/index.js    Función serverless de Vercel (envuelve server/app.ts)
   auth/         Login propio (bcrypt + JWT en cookie httpOnly)
   ai/           Proveedor IA OpenAI-compatible (AI_API_KEY)
   lib/storage.ts  Supabase Storage (subida + URLs firmadas)
@@ -150,18 +196,18 @@ Dockerfile      Imagen todo-en-uno (frontend compilado + backend)
 docker-compose.yml
 ```
 
-## 7. Panel de administración
+## 8. Panel de administración
 
 - URL: `/login` → email + contraseña del admin.
 - Solicitudes del formulario y del chat con estados: `nuevo → en_revision → pendiente_contactar → contactado → presupuesto_enviado → finalizado`.
 - Notas internas por solicitud y exportación CSV.
 - Los adjuntos se descargan con URLs firmadas de 10 minutos.
 
-## 8. Chat con Relevance AI (opcional)
+## 9. Chat con Relevance AI (opcional)
 
 La web trae **dos chats**: el integrado (IA OpenAI-compatible, todo en tu Supabase) y, si lo activas, tu agente de **Relevance AI** embebido. Si configuras Relevance, el widget de Relevance sustituye automáticamente al chat integrado.
 
-### 8.1 Crea y configura el agente en Relevance AI
+### 9.1 Crea y configura el agente en Relevance AI
 
 1. Crea el agente en tu cuenta de Relevance AI.
 2. Pega en sus instrucciones el prompt de recepción (está completo en `api/chat-router.ts`, función `buildSystemPrompt`): recepción de solicitudes, preguntas progresivas, nunca negocia precios ni plazos, y al confirmar el visitante, prepara el envío.
@@ -190,7 +236,7 @@ La web trae **dos chats**: el integrado (IA OpenAI-compatible, todo en tu Supaba
    - Obligatorios: `nombre`, `telefono`, `email`. El resto son opcionales.
    - Cuando el tool se ejecuta con éxito, la solicitud aparece en tu panel `/admin` con origen **Chat**.
 
-### 8.2 Genera el secreto y actívalo
+### 9.2 Genera el secreto y actívalo
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
@@ -198,7 +244,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 Ponlo en tu `.env` como `RELEVANCE_WEBHOOK_SECRET` y úsalo también en el header del tool step. Sin este secreto el webhook responde 404 (deshabilitado) y con secreto incorrecto, 401.
 
-### 8.3 Incrusta el widget en la web
+### 9.3 Incrusta el widget en la web
 
 1. En Relevance AI: **Agent → Share → Chat Widget** y personaliza colores (`primary_color: #AEC51B` va con la marca), mensaje de bienvenida y prompts iniciales.
 2. Copia el snippet `<script …>` que te dan.
@@ -207,11 +253,11 @@ Ponlo en tu `.env` como `RELEVANCE_WEBHOOK_SECRET` y úsalo también en el heade
 
 > ⚠️ Ten en cuenta: el widget de Relevance es público y el consumo del agente se cobra de **tus créditos de Relevance AI**. Las conversaciones se ven en Relevance; las **solicitudes** se ven en tu panel.
 
-### 8.4 Volver al chat integrado
+### 9.4 Volver al chat integrado
 
 Borra (o comenta) `VITE_RELEVANCE_EMBED_SNIPPET` del `.env`, reconstruye y listo: la web vuelve al chat propio con `AI_API_KEY`.
 
-## 9. Seguridad (resumen)
+## 10. Seguridad (resumen)
 
 - Contraseñas con bcrypt (coste 12). Sesión JWT HS256 en cookie httpOnly.
 - Rate limiting en login, formulario, subida de adjuntos y chat.

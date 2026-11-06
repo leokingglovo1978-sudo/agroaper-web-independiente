@@ -8,7 +8,7 @@ import { defineConfig } from "vite"
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    devServer({ entry: "api/boot.ts", exclude: [/^\/(?!api\/).*$/] }),
+    devServer({ entry: "server/boot.ts", exclude: [/^\/(?!api\/).*$/] }),
     react(),
     VitePWA({
       registerType: "autoUpdate",

@@ -27,7 +27,10 @@ import { scrubCtx, scrubValue } from "./scrub";
 // turning a logging feature into a new outage class. Hence an explicit byte
 // budget below: past it the file is truncated once, with a marker, so the newest
 // evidence survives and the total stays bounded.
-const LOG_DIR = process.env.LOG_DIR ?? "./logs";
+// En Vercel el filesystem del proyecto es de solo lectura; /tmp es la única
+// zona escribible (y efímera). En VPS/Docker se usa ./logs junto al proyecto.
+const LOG_DIR =
+  process.env.LOG_DIR ?? (process.env.VERCEL ? "/tmp/agroaper-logs" : "./logs");
 const LOG_FILE = process.env.LOG_FILE ?? path.join(LOG_DIR, "app.log");
 // 8 MiB is far more than a debugging session reads and small enough that even a
 // hostile write rate cannot exhaust a sandbox disk.

@@ -1,6 +1,6 @@
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
-import type { AppRouter } from "../../api/router";
+import type { AppRouter } from "../../server/router";
 
 /** Cliente tRPC imperativo (para llamadas fuera de hooks de React Query). */
 export const trpcClient = createTRPCClient<AppRouter>({

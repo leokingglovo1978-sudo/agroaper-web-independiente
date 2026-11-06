@@ -23,7 +23,7 @@ export class StorageError extends Error {
   }
 }
 
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // coherente con el límite del formulario (8MB)
+const MAX_UPLOAD_BYTES = 3 * 1024 * 1024; // coherente con el límite del formulario (3MB)
 const SIGNED_URL_TTL_SECONDS = 600; // 10 minutos
 
 const MIME_BY_EXT: Record<string, string> = {
@@ -101,7 +101,7 @@ export class Storage {
       throw new StorageError("STORAGE_INVALID_INPUT", "El archivo está vacío");
     }
     if (body.byteLength > MAX_UPLOAD_BYTES) {
-      throw new StorageError("STORAGE_FILE_TOO_LARGE", "El archivo supera el límite de 8MB");
+      throw new StorageError("STORAGE_FILE_TOO_LARGE", "El archivo supera el límite de 3MB");
     }
     const contentType = input.contentType ?? guessContentType(input.fileName);
     const key = uniqueKey(input.fileName);

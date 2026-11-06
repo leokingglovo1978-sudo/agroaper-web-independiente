@@ -10,7 +10,10 @@ let instance: ReturnType<typeof drizzle<typeof fullSchema>>;
 
 export function getDb() {
   if (!instance) {
-    const client = postgres(env.databaseUrl, { prepare: false });
+    // prepare:false → obligatorio con el pooler de Supabase en modo transaction.
+    // max:3 → en serverless cada instancia abre su propio pool; hay que
+    // mantenerlo pequeño para no agotar las conexiones del pooler.
+    const client = postgres(env.databaseUrl, { prepare: false, max: 3 });
     instance = drizzle(client, { schema: fullSchema });
   }
   return instance;

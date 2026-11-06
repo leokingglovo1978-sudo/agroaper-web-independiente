@@ -118,8 +118,8 @@ export default function Contacto() {
       setFileError("Formato no admitido. Usa JPG, PNG, WebP o PDF.");
       return;
     }
-    if (f.size > 8 * 1024 * 1024) {
-      setFileError("El archivo supera el máximo de 8 MB.");
+    if (f.size > 3 * 1024 * 1024) {
+      setFileError("El archivo supera el máximo de 3 MB.");
       return;
     }
     setFile(f);
@@ -407,7 +407,7 @@ export default function Contacto() {
                           onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
                         />
                       </div>
-                      <p className="mt-1.5 text-xs text-foreground/55">JPG, PNG, WebP o PDF. Máximo 8 MB.</p>
+                      <p className="mt-1.5 text-xs text-foreground/55">JPG, PNG, WebP o PDF. Máximo 3 MB.</p>
                       {fileError && <p className="mt-1.5 text-sm font-medium text-red-700">{fileError}</p>}
                     </div>
                   </div>

@@ -34,7 +34,9 @@ const ALLOWED_TYPES = new Map<string, string>([
   ["image/webp", "webp"],
   ["application/pdf", "pdf"],
 ]);
-const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
+// 3MB binarios ≈ 4MB en base64: cabe en el límite de body de Vercel (4,5MB).
+// En un VPS propio puede subirse este valor (allí manda el bodyLimit de 50MB).
+const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024;
 
 function clientIp(req: Request): string {
   return (
@@ -54,7 +56,7 @@ export const requestsRouter = createRouter({
     .input(
       z.object({
         name: z.string().trim().min(1).max(200),
-        contentBase64: z.string().max(12 * 1024 * 1024), // ~8MB en base64
+        contentBase64: z.string().max(6 * 1024 * 1024), // ~3MB en base64
         contentType: z.string().max(100),
       }),
     )
@@ -76,7 +78,7 @@ export const requestsRouter = createRouter({
       if (bytes.length > MAX_ATTACHMENT_BYTES) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "El archivo supera el máximo de 8 MB.",
+          message: "El archivo supera el máximo de 3 MB.",
         });
       }
       const safeName = input.name.replace(/[^\w.\-áéíóúñü ]/gi, "_").slice(0, 120);
