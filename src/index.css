@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Sistema shadcn mapeado a la identidad AGROAPER (tema claro único) */
+    --background: 60 17% 95%; /* blanco cálido #F5F5EF */
+    --foreground: 90 12% 13%; /* grafito #20251D */
+    --card: 0 0% 100%;
+    --card-foreground: 90 12% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 90 12% 13%;
+    --primary: 75 79% 39%; /* verde oliva-lima #9AB314 */
+    --primary-foreground: 90 12% 13%;
+    --secondary: 60 10% 90%;
+    --secondary-foreground: 90 12% 13%;
+    --muted: 60 10% 90%;
+    --muted-foreground: 90 6% 38%;
+    --accent: 29 88% 55%; /* naranja industrial #F28C28 */
+    --accent-foreground: 90 12% 13%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 70 10% 84%;
+    --input: 70 10% 80%;
+    --ring: 75 79% 39%;
+    --radius: 0.625rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 16px;
+    line-height: 1.65;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: #aec51b;
+    color: #20251d;
+  }
+
+  :focus-visible {
+    outline: 3px solid #f28c28;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+@layer utilities {
+  /* Scrim cinematográfico para fotografías con texto encima */
+  .scrim-bottom {
+    background: linear-gradient(to top, rgba(16, 20, 14, 0.88) 0%, rgba(16, 20, 14, 0.45) 45%, transparent 75%);
+  }
+  .scrim-full {
+    background: linear-gradient(180deg, rgba(16, 20, 14, 0.55) 0%, rgba(16, 20, 14, 0.25) 40%, rgba(16, 20, 14, 0.75) 100%);
+  }
+
+  /* Zoom lento cinematográfico en hover (transform únicamente) */
+  .zoom-slow {
+    transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+  .group:hover .zoom-slow {
+    transform: scale(1.06);
+  }
+
+  /* Micro-etiquetas industriales en mayúsculas */
+  .eyebrow {
+    @apply font-display uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    font-weight: 600;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Cinta de marca en movimiento (marquee) */
+@keyframes agro-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: agro-marquee 32s linear infinite;
+}
+
+/* Indicador de escritura del chat */
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot {
+  animation: typing-dot 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* Respeta usuarios con movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .marquee-track, .typing-dot { animation: none; }
+  .zoom-slow { transition: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

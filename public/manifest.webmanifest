@@ -1,0 +1,13 @@
+{
+  "name": "AGROAPER — Fabricante de aperos agrícolas",
+  "short_name": "AGROAPER",
+  "description": "Aperos agrícolas para tractores pequeños y compactos. Fabricación propia en Almería.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F5EF",
+  "theme_color": "#254E27",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

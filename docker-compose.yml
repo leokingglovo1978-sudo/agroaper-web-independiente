@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    container_name: agroaper-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
