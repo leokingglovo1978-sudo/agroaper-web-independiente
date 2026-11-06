@@ -21,8 +21,8 @@ export const env = {
   adminEmail: process.env.ADMIN_EMAIL ?? "",
   adminPassword: process.env.ADMIN_PASSWORD ?? "",
 
-  /** AI provider (OpenAI-compatible API) */
-  aiApiKey: required("AI_API_KEY"),
+  /** AI provider (OpenAI-compatible API) — opcional: sin key, el chat queda desactivado */
+  aiApiKey: process.env.AI_API_KEY ?? "",
   aiBaseUrl: process.env.AI_BASE_URL ?? "https://api.openai.com/v1",
   aiModel: process.env.AI_MODEL ?? "gpt-4o-mini",
 
